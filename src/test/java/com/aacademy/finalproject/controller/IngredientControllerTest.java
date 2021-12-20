@@ -5,6 +5,7 @@ import com.aacademy.finalproject.dto.IngredientDto;
 import com.aacademy.finalproject.entity.Ingredient;
 import com.aacademy.finalproject.service.IngredientService;
 import org.junit.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(value = IngredientController.class)
 public class IngredientControllerTest extends BaseControllerTest {
 
     @MockBean
@@ -24,52 +26,59 @@ public class IngredientControllerTest extends BaseControllerTest {
 
     @Test
     public void save() throws Exception {
-        IngredientDto ingredientDto = IngredientDto.builder().id(1L).build();
+        IngredientDto ingredientDto = IngredientDto.builder().id(1L).name("sugar").build();
         String requestJson = objectMapper.writeValueAsString(ingredientDto);
 
         when(ingredientConverter.toIngredient(any(IngredientDto.class))).thenReturn(Ingredient.builder().build());
         when(ingredientService.save(any(Ingredient.class))).thenReturn(Ingredient.builder().build());
-        when(ingredientConverter.toIngredientDto(any(Ingredient.class))).thenReturn(IngredientDto.builder().id(1L).id(1L).build());
+        when(ingredientConverter.toIngredientDto(any(Ingredient.class))).thenReturn(IngredientDto.builder().id(1L).name("sugar").build());
 
-        mockMvc.perform(post("/ingredients")
+        mockMvc.perform(post("/ingredient")
                 .content(requestJson)
                 .contentType(MediaType.APPLICATION_JSON)
         )
 
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("sugar")));
     }
 
     @Test
     public void findById() throws Exception {
         when(ingredientService.findById(any(Long.class))).thenReturn(Ingredient.builder().build());
-        when(ingredientConverter.toIngredientDto(any(Ingredient.class))).thenReturn(IngredientDto.builder().id(1L).build());
+        when(ingredientConverter.toIngredientDto(any(Ingredient.class))).thenReturn(IngredientDto.builder()
+                .id(1L)
+                .name("sugar")
+                .build());
 
-        mockMvc.perform(get("/ingredient/id/1"))
+        mockMvc.perform(get("/ingredient/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("sugar")));
+
     }
 
     public void deleteTest() throws Exception {
-        mockMvc.perform(delete("/floors/1"))
+        mockMvc.perform(delete("/ingredient/1"))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void update() throws Exception {
-       IngredientDto ingredientDto = IngredientDto.builder().id(2L).build();
+        IngredientDto ingredientDto = IngredientDto.builder().id(1L).name("sugar").build();
         String requestJson = objectMapper.writeValueAsString(ingredientDto);
 
         when(ingredientConverter.toIngredientDto(any())).thenReturn(ingredientDto);
 
-        mockMvc.perform(put("/ingredients/1")
+        mockMvc.perform(put("/ingredient/1")
                 .content(requestJson)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(2)));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.name", is("sugar")));
     }
 
 
